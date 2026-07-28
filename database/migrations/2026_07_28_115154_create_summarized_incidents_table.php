@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('summarized_incidents', function (Blueprint $table) {
             $table->id();
             $table->text('generated_summary');
-            $table->foreignId('predicted_category_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('predicted_category_id')->constrained('categories')->cascadeOnDelete();
             $table->foreignId('incident_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
