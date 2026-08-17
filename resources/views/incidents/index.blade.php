@@ -1,5 +1,4 @@
 @extends('layouts.sidebar')
-
 <style>
     body{
         background:#f5f7fb;
@@ -190,3 +189,4 @@
 
 </div>
 </div>
+

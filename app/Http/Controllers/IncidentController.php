@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enums\IncidentStatusEnum;
+use App\Models\Category;
 use App\Models\Incident;
+use App\Models\SummarizedIncident;
 use Illuminate\Http\Request;
+use App\Services\OpenAIService;
 
 class IncidentController extends Controller
 {
@@ -29,7 +32,7 @@ class IncidentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, OpenAIService $openAIService)
     {
         $request->validate([
             'title' => 'required',
@@ -60,6 +63,23 @@ class IncidentController extends Controller
             }
         }
 
+        $aiResult = $openAIService->analyzeIncident(
+            $incident->title,
+            $incident->description
+        );
+
+        $category = Category::where('name', $aiResult['category'])->first();
+
+        $incident->update([
+            'category_id' => $category->id,
+        ]);
+
+        SummarizedIncident::create([
+            'incident_id' => $incident->id,
+            'generated_summary' => $aiResult['summary'],
+            'predicted_category_id' => $category?->id,
+        ]);
+
         return redirect()->route('incidents.index');
     }
 
@@ -68,6 +88,7 @@ class IncidentController extends Controller
      */
     public function show(Incident $incident)
     {
+        $incident->load('summarizedIncident');
         return view('incidents/show', compact('incident'));
     }
 

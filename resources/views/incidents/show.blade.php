@@ -405,14 +405,14 @@
     </div>
     @endif
 
-    <!-- AI Summary (if exists) -->
     @if($incident->summarizedIncident)
     <div class="card shadow-sm border-0 mb-4" style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); border-left: 4px solid #0284c7;">
         <div class="card-body p-4">
             <h5 class="mb-3">
                 <i class="bi bi-lightbulb text-info me-2"></i>AI-Generated Summary
             </h5>
-            <p class="mb-0" style="line-height: 1.6; color: #0c4a6e;">{{ $incident->summarizedIncident->summary }}</p>
+            <p class="mb-0" style="line-height: 1.6; color: #0c4a6e;"><b>AI Summary:</b> {{ $incident->summarizedIncident->generated_summary }}</p>
+            <p class="mb-0" style="line-height: 1.6; color: #0c4a6e;"><b>AI Recommended Category:</b> {{ $incident->summarizedIncident->predictedCategory->name }}</p>
         </div>
     </div>
     @endif

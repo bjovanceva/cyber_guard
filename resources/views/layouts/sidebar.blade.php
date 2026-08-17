@@ -117,6 +117,126 @@
         padding: 1rem 0.5rem;
         justify-content: center;
     }
+
+    .sidebar-user {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        border-top: 1px solid #e5e7eb;
+        padding: 0.75rem;
+        background: #ffffff;
+    }
+
+    .sidebar-user-button {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background 0.2s ease;
+    }
+
+    .sidebar-user-button:hover {
+        background: #f1f5f9;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 0;
+    }
+
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .user-avatar i {
+        font-size: 1.1rem;
+        color: #333232;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 0;
+    }
+
+    .user-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #222;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+    }
+
+    .user-email {
+        font-size: 0.75rem;
+        color: #6b7280;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+    }
+
+    .user-chevron {
+        font-size: 0.8rem;
+        color: #6b7280;
+        transition: transform 0.2s ease;
+    }
+
+    .user-dropdown {
+        display: none;
+        margin-top: 0.5rem;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .user-dropdown.show {
+        display: block;
+    }
+
+    .user-dropdown a,
+    .user-dropdown button {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: transparent;
+        color: #333232;
+        text-decoration: none;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    .user-dropdown a:hover,
+    .user-dropdown button:hover {
+        background: #f1f5f9;
+    }
+
+    .user-dropdown i {
+        width: 1.2rem;
+    }
 </style>
 
 <div class="sidebar" id="sidebar">
@@ -136,6 +256,44 @@
 {{--        <li><a href="#"><i class="bi bi-gear"></i><span>Settings</span></a></li>--}}
 {{--        <li><a href="#"><i class="bi bi-question-circle"></i><span>Help</span></a></li>--}}
     </ul>
+
+    @if(Auth::check())
+    <div class="sidebar-user">
+        <button class="sidebar-user-button" id="userDropdownToggle">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+
+                <div class="user-details">
+                    <span class="user-name">{{ Auth::user()->name }}</span>
+                    <span class="user-email">{{ Auth::user()->email }}</span>
+                </div>
+            </div>
+
+            <i class="bi bi-chevron-down user-chevron"></i>
+        </button>
+
+        <div class="user-dropdown" id="userDropdown">
+            {{-- Profile - only keep this if you have profile.edit --}}
+            {{--
+            <a href="{{ route('profile.edit') }}">
+                <i class="bi bi-person"></i>
+                <span>Profile</span>
+            </a>
+            --}}
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+
+                <button type="submit">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Log Out</span>
+                </button>
+            </form>
+        </div>
+    </div>
+    @endif
 </div>
 
 
@@ -163,4 +321,12 @@
             ? '<i class="bi bi-chevron-right"></i>'
             : '<i class="bi bi-chevron-left"></i>';
     });
+
+    const userDropdownToggle = document.getElementById('userDropdownToggle');
+    const userDropdown = document.getElementById('userDropdown');
+
+    userDropdownToggle.addEventListener('click', () => {
+        userDropdown.classList.toggle('show');
+    });
 </script>
+
