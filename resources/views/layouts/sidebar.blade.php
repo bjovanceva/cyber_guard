@@ -238,6 +238,7 @@
         width: 1.2rem;
     }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <div class="sidebar" id="sidebar">
     <button class="sidebar-toggle" id="sidebarToggle">
@@ -248,13 +249,42 @@
         <span>CyberGuard</span>
     </div>
     <ul class="sidebar-menu">
-        <li><a href="{{ route('welcome') }}" class="{{ request()->routeIs('welcome') ? 'active' : '' }}">><i class="bi bi-gear"></i><span>Home</span></a></li>
-        <li><a href="{{ route('incidents.index') }}" class="{{ request()->routeIs('incidents.index') ? 'active' : '' }}">><i class="bi bi-list-check"></i><span>All Incidents</span></a></li>
-        <li><a href="{{ route('incidents.create') }}" class="{{ request()->routeIs('incidents.create') ? 'active' : '' }}">><i class="bi bi-plus-circle"></i><span>Report Incident</span></a></li>
-        <li><a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.index') ? 'active' : '' }}">><i class="bi bi-tags-fill"></i><span>All Categories</span></a></li>
-        <li><a href="{{ route('categories.create') }}" class="{{ request()->routeIs('categories.create') ? 'active' : '' }}">><i class="bi bi-plus-circle"></i><span>Create Category</span></a></li>
-{{--        <li><a href="#"><i class="bi bi-gear"></i><span>Settings</span></a></li>--}}
-{{--        <li><a href="#"><i class="bi bi-question-circle"></i><span>Help</span></a></li>--}}
+        <li><a href="{{ route('welcome') }}" class="{{ request()->routeIs('welcome') ? 'active' : '' }}"><i class="bi bi-gear"></i><span>Home</span></a></li>
+        @auth
+            <li><a href="{{ route('incidents.index') }}" class="{{ request()->routeIs('incidents.index') ? 'active' : '' }}"><i class="bi bi-list-check"></i><span>All Incidents</span></a></li>
+            @if(in_array(auth()->user()->role->value, ['user']))
+            <li>
+                <a href="{{ route('incidents.create') }}" class="{{ request()->routeIs('incidents.create') ? 'active' : '' }}">><i class="bi bi-plus-circle"></i><span>Report Incident</span></a>
+            </li>
+            @endif
+        @endauth
+        @auth
+            @if(in_array(auth()->user()->role->value, ['admin', 'reviewer']))
+                <li>
+                    <a href="{{ route('categories.index') }}"
+                       class="{{ request()->routeIs('categories.index') ? 'active' : '' }}">
+                        <i class="bi bi-tags-fill"></i>
+                        <span>All Categories</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('categories.create') }}"
+                       class="{{ request()->routeIs('categories.create') ? 'active' : '' }}">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Create Category</span>
+                    </a>
+                </li>
+            @endif
+                @if(auth()->user()->role->value === 'admin')
+                    <li>
+                        <a href="{{ route('reviewers.create') }}">
+                            <i class="bi bi-person-plus-fill"></i>
+                            <span>Register Reviewer</span>
+                        </a>
+                    </li>
+                @endif
+        @endauth
     </ul>
 
     @if(Auth::check())

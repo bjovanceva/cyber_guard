@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Enums\IncidentStatusEnum;
+use App\Enums\UserRoleEnum;
 use App\Models\Category;
 use App\Models\Incident;
 use App\Models\SummarizedIncident;
 use Illuminate\Http\Request;
 use App\Services\OpenAIService;
+use Illuminate\Support\Facades\Auth;
 
 class IncidentController extends Controller
 {
@@ -16,8 +18,12 @@ class IncidentController extends Controller
      */
     public function index()
     {
-        $query = Incident::all();
-        //$categories = $query->latest()->paginate(10);
+        if (auth()->check() && (auth()->user()->role === UserRoleEnum::ADMIN) || (auth()->user()->role === UserRoleEnum::REVIEWER)) {
+            $query = Incident::all();
+        } else {
+            $query = Incident::where('user_id', auth()->id())->get();
+        }
+//        dd(Auth::user()->role);
         return view('incidents/index', compact('query'));
     }
 
@@ -46,7 +52,7 @@ class IncidentController extends Controller
             'description' => $request->description,
             'date_reported' => now(),
             'status' => IncidentStatusEnum::PENDING,
-            //'user_id' => auth()->id(),
+            'user_id' => auth()->id(),
             //'category_id' => $request->category_id,
         ]);
 
@@ -106,6 +112,26 @@ class IncidentController extends Controller
     public function update(Request $request, string $id)
     {
         //
+    }
+
+    /**
+     * Update the incident status (reviewers or admins only).
+     */
+    public function updateStatus(Request $request, Incident $incident)
+    {
+        if (!auth()->check() || !(auth()->user()->role === UserRoleEnum::ADMIN || auth()->user()->role === UserRoleEnum::REVIEWER)) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'status' => 'required|in:pending,under_review,resolved',
+        ]);
+
+        $incident->update([
+            'status' => $data['status'],
+        ]);
+
+        return redirect()->route('incidents.index');
     }
 
     /**
