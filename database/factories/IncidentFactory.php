@@ -23,7 +23,7 @@ class IncidentFactory extends Factory
             'title' => $this->faker->sentence(),
             'description' => $this->faker->paragraph(),
             'date_reported' => $this->faker->dateTimeThisYear(),
-            'status' => $this->faker->randomElement(['reported', 'under_review', 'closed']),
+            'status' => $this->faker->randomElement(['pending', 'under_review', 'resolved']),
             'user_id'=>User::query()->inRandomOrder()->value('id'),
             'category_id'=>Category::query()->inRandomOrder()->value('id'),
         ];
