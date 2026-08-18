@@ -258,14 +258,42 @@
                 <i class="bi bi-info-circle me-1"></i>Status
             </div>
             <div>
-                @if($incident->status == 'Pending')
-                    <span class="badge bg-warning text-dark">⏳ Pending</span>
-                @elseif($incident->status == 'Resolved')
-                    <span class="badge bg-success text-white">✔ Resolved</span>
-                @elseif($incident->status == 'Rejected')
-                    <span class="badge bg-danger text-white">✖ Rejected</span>
+                @if(auth()->check() && (auth()->user()->role === \App\Enums\UserRoleEnum::ADMIN || auth()->user()->role === \App\Enums\UserRoleEnum::REVIEWER))
+                    <form method="POST" action="{{ route('incidents.updateStatus', $incident) }}">
+                        @csrf
+                        @method('PATCH')
+                        <div class="d-flex align-items-center" style="gap:.5rem;">
+                            @php
+                                                            $statuses = ['pending' => 'Pending', 'under_review' => 'Under review', 'resolved' => 'Resolved'];
+                                                            $current = $incident->status instanceof \App\Enums\IncidentStatusEnum ? $incident->status->value : $incident->status;
+                                                            $ordered = [];
+                                                            if(isset($statuses[$current])){
+                                                                $ordered[$current] = $statuses[$current];
+                                                                foreach($statuses as $k => $v){ if($k !== $current) $ordered[$k] = $v; }
+                                                            } else {
+                                                                $ordered = $statuses;
+                                                            }
+                                                        @endphp
+
+                                                        <select name="status" class="form-control form-control-sm" style="width:200px; display:inline-block;">
+                                                            @foreach($ordered as $k => $label)
+                                                                <option value="{{ $k }}" {{ $current === $k ? 'selected' : '' }}>{{ $label }}</option>
+                                                            @endforeach
+                                                        </select>
+                            <button class="btn btn-sm btn-primary" type="submit">Update</button>
+                        </div>
+                    </form>
                 @else
-                    <span class="badge bg-info text-white">{{ $incident->status }}</span>
+                    @php $current = $incident->status instanceof \App\Enums\IncidentStatusEnum ? $incident->status->value : $incident->status; @endphp
+                    @if($current === 'pending')
+                        <span class="badge bg-warning text-dark">⏳ Pending</span>
+                    @elseif($current === 'under_review')
+                        <span class="badge bg-info text-white">🔎 Under review</span>
+                    @elseif($current === 'resolved')
+                        <span class="badge bg-success text-white">✔ Resolved</span>
+                    @else
+                        <span class="badge bg-secondary text-white">{{ ucwords(str_replace('_',' ', $current)) }}</span>
+                    @endif
                 @endif
             </div>
         </div>
@@ -289,14 +317,6 @@
             </div>
             <div class="detail-value">{{ \Carbon\Carbon::parse($incident->date_reported)->format('d M Y') }}</div>
             <div class="detail-subtext">{{ \Carbon\Carbon::parse($incident->date_reported)->format('H:i A') }}</div>
-        </div>
-
-        <!-- Incident ID -->
-        <div class="detail-box">
-            <div class="detail-label">
-                <i class="bi bi-hash me-1"></i>Incident ID
-            </div>
-            <div class="detail-value" style="font-family: monospace; color: #0d6efd;">#{{ str_pad($incident->id, 6, '0', STR_PAD_LEFT) }}</div>
         </div>
 
         @if($incident->user)

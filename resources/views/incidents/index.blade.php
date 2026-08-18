@@ -154,14 +154,15 @@
                                 <span class="badge bg-secondary text-white">{{ $incident->category->name ?? 'Not assigned' }}</span>
                             </td>
                             <td>
-                                @if($incident->status == 'Pending')
+                                @php $status = $incident->status instanceof \App\Enums\IncidentStatusEnum ? $incident->status->value : $incident->status; @endphp
+                                @if($status === 'pending')
                                     <span class="badge bg-warning text-dark">⏳ Pending</span>
-                                @elseif($incident->status == 'Resolved')
+                                @elseif($status === 'under_review')
+                                    <span class="badge bg-info text-white">🔎 Under review</span>
+                                @elseif($status === 'resolved')
                                     <span class="badge bg-success text-white">✔ Resolved</span>
-                                @elseif($incident->status == 'Rejected')
-                                    <span class="badge bg-danger text-white">✖ Rejected</span>
                                 @else
-                                    <span class="badge bg-info text-white">{{ $incident->status }}</span>
+                                    <span class="badge bg-secondary text-white">{{ ucwords(str_replace('_',' ', $status)) }}</span>
                                 @endif
                             </td>
                             <td>{{ \Carbon\Carbon::parse($incident->date_reported)->format('d M Y') }}</td>
